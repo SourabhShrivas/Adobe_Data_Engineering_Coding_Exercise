@@ -11,9 +11,9 @@ aws cloudformation deploy --template-file deployment_template.yml --stack-name i
 aws s3 cp /Users/soura/Downloads/data.tsv s3://inputs3bucket-adobe/
 
 
-aws s3 rm s3://adobe-input --recursive
+aws s3 rm s3://inputs3bucket-adobe --recursive
 
-aws s3 rm s3://adobe-output --recursive
+aws s3 rm s3://outputs3bucket-adobe --recursive
 
 Deleting the stack
 aws cloudformation delete-stack --stack-name infrastructure
