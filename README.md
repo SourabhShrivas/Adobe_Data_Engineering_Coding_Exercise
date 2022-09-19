@@ -1,15 +1,15 @@
 # Data Engineering Coding Exercise
 
-This exercise illustrates Python/AWS application that reads hit-level data files as input and helps us understand revenue sources for their products with respect to a search engine and search keywords. This application runs and create infrastructure with AWS Cloudformation and uses event-driven serverless computing lambda function and Glue Job services to process input file and give output with a revenue source for their products.
+This exercise illustrates Python/AWS application that reads hit-level data files as input and helps us understand revenue sources for their products with respect to a search engine and search keywords. This application runs and creates infrastructure with AWS Cloudformation and uses event-driven serverless computing Lambda function and Glue Job Services to process input file and give output with a revenue source for their products.
 
 ## Prerequisites
 
-1. AWS CLI - Required to perform operations using local machine.
-2. AWS S3 bucket - We need to store files in zip format to load in lambda function and glue job.
+1. AWS CLI - Require to perform operations using local machine.
+2. AWS S3 bucket - Need to store files in zip format to load in Lambda function and Glue job.
 
 ## Application Components details
 
-[deployment_template.yml(deployment_template.yml) - AWS CloudFormation template to provision infrastructure as a code to run this application (we are creating IAM roles, S3 buckets (input and output) , Glue ETL Job, Lambda event based Function, and Permission to access lambda and glue).
+[deployment_template.yml(deployment_template.yml) - AWS CloudFormation template to provision infrastructure as a code to run this application (Create IAM roles, S3 buckets (input and output) , Glue ETL Job, Lambda event based Function, and Permission to access lambda and glue).
 
 [src/app.py](src/app.py) - Python code to process AWS Glue job.
 
@@ -57,7 +57,7 @@ aws cloudformation deploy --template-file deployment_template.yml --stack-name i
 ```bash
 aws s3 cp /Users/soura/Downloads/data.tsv s3://inputs3bucket-adobe/
 ```
-6. Monitor jobs in following - \
+6. Monitor jobs - \
    6.1 - AWS Lambda > ColudWatch > Log Groups \
    6.2 - AWS Glue Job > AWS Glue Studio > Monitoring \
 
