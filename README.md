@@ -57,9 +57,9 @@ aws cloudformation deploy --template-file deployment_template.yml --stack-name i
 ```bash
 aws s3 cp /Users/soura/Downloads/data.tsv s3://inputs3bucket-adobe/
 ```
-6. Monitor jobs in following - 
-   6.1 - AWS Lambda > ColudWatch > Log Groups
-   6.2 - AWS Glue Job > AWS Glue Studio > Monitoring
+6. Monitor jobs in following - \
+   6.1 - AWS Lambda > ColudWatch > Log Groups \
+   6.2 - AWS Glue Job > AWS Glue Studio > Monitoring \
 
 ## Deleting the cloudFormation stack
 
