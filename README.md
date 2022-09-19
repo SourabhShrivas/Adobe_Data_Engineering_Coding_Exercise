@@ -31,7 +31,7 @@ This exercise illustrates Python/AWS application that reads hit-level data file
 1. Git clone the repository
 
 ```bash
-https://github.com/SourabhShrivas/Adobe_Data_Engineering_Coding_Exercise
+https://github.com/SourabhShrivas/Data_Engineering_Coding_Exercise
 ```
 
 2. Upload the lambda function to an S3 bucket
