@@ -19,10 +19,9 @@ This exercise illustrates Python/AWS application that reads hit-level data file
 
 [lambda.zip](lambda.zip) - Compressed ZIP file containing lambda folder.
 
-## Serverless deployment process flow (created in AWS couldformation - designer)
+## Conceptual Process Flow
 ![Conceptual-Process-Flow stages](Conceptual-Process-Flow.png)
 
-Conceptual Process Flow
 ## Serverless deployment process flow (created in AWS couldformation - designer)
 ![Process stages](deployment-design-template.png)
 
