@@ -1,0 +1,153 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'This colud formation template will creates two S3 buckets, one IAM Role, one AWS Glue job and one lambda function'
+Parameters:
+  S3Bucketname:
+    Description: Prerequist existing s3 bucket. where we upload lambda and glue job before initiate our process
+    Type: String
+    Default: s3-adobe-repository
+    
+  S3InputBucketname:
+    Description: s3 bucket to drop input file
+    Type: String
+    Default: inputs3bucket-adobe
+    
+  S3OutputBucketname:
+    Description: s3 bucket to store output file
+    Type: String
+    Default: outputs3bucket-adobe
+
+Resources:
+  # creating the IAM role for the glue and lambda function
+  GlueJobIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - glue.amazonaws.com
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:ListBucket
+                  - s3:DeleteObject
+                Resource:
+                  - !Sub 'arn:${AWS::Partition}:s3:::${S3Bucketname}'
+                  - !Sub 'arn:${AWS::Partition}:s3:::${S3Bucketname}/*'
+                  - !Sub 'arn:aws:s3:::${S3InputBucketname}'
+                  - !Sub 'arn:aws:s3:::${S3InputBucketname}/*'
+                  - !Sub 'arn:aws:s3:::${S3OutputBucketname}'
+                  - !Sub 'arn:aws:s3:::${S3OutputBucketname}/*'
+              - Effect: Allow
+                Action:
+                  - autoscaling:Describe*
+                  - cloudwatch:*
+                  - logs:*
+                  - sns:*
+                  - iam:GetPolicy
+                  - iam:GetPolicyVersion
+                  - iam:GetRole
+                Resource: "*"
+              - Effect: Allow
+                Action: iam:CreateServiceLinkedRole
+                Resource: arn:aws:iam::*:role/aws-service-role/events.amazonaws.com/AWSServiceRoleForCloudWatchEvents*
+                Condition:
+                  StringLike:
+                    iam:AWSServiceName: events.amazonaws.com
+              - Effect: Allow
+                Action:
+                  - glue:* 
+                Resource: "*"
+       
+# creating the glue job     
+  GlueJob:
+    Type: AWS::Glue::Job
+    Properties:
+      Command:
+        Name: glueetl
+        ScriptLocation: !Sub 's3://${S3Bucketname}/etl/app.py'
+      DefaultArguments:
+        --job-bookmark-option: job-bookmark-enable
+      GlueVersion: '3.0'
+      ExecutionProperty:
+        MaxConcurrentRuns: 2
+      MaxRetries: 0
+      Name: extract_transfer_load
+      Role: !Ref 'GlueJobIAMRole'
+      WorkerType: G.1X
+      NumberOfWorkers: 2         
+
+  # creating the S3 bucket to store input file and initiate lambda function, when any file is landed to input s3
+  InputS3bucket:
+    Type: AWS::S3::Bucket
+    DependsOn: InvokeS3Permission
+    Properties:
+      BucketName: !Ref S3InputBucketname
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: s3:ObjectCreated:Put
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: .tsv
+            Function: !GetAtt [ LambdaFunction, Arn]
+
+  # creating S3 output bucket to store output file
+  OutputS3bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3OutputBucketname
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+              
+  # lambda permission to get notification from input S3 bucket
+  InvokeS3Permission:
+    Type: AWS::Lambda::Permission
+    DependsOn: LambdaFunction
+    Properties:
+      FunctionName:
+        Fn::GetAtt:
+          - LambdaFunction
+          - Arn
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceArn:
+        Fn::Sub: arn:aws:s3:::${S3InputBucketname}
+        
+        
+  # lambda function to trigger ETL glue job
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: trigger_glue_etl_lambda
+      Runtime: python3.9
+      Timeout: 5
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt 'GlueJobIAMRole.Arn'
+      Code:
+        S3Bucket: 's3-adobe-repository'
+        S3Key: 'lambda.zip' 
