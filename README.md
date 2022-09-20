@@ -9,7 +9,7 @@ This exercise illustrates Python/AWS application that reads hit-level data file
 
 ## Application Components details
 
-[deployment_template.yml(deployment_template.yml) - AWS CloudFormation template to provision infrastructure as a code to run this application (Create IAM roles, S3 buckets (input and output) , Glue ETL Job, Lambda event based Function, and Permission to access lambda and glue).
+[deployment_template.yml](deployment_template.yml) - AWS CloudFormation template to provision infrastructure as a code to run this application (Create IAM roles, S3 buckets (input and output) , Glue ETL Job, Lambda event based Function, and Permission to access lambda and glue).
 
 [src/app.py](src/app.py) - Python code to process AWS Glue job.
 
